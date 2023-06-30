@@ -24,3 +24,7 @@ const schoolSchema = new mongoose.Schema({
   
   module.exports = School;
   
+
+
+
+  
