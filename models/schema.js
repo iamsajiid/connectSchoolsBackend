@@ -19,7 +19,7 @@ const productSchema = new mongoose.Schema({
     "school photo urls" : [String] // Changed to an array of strings for photo URLs
 })
 
-module.exports = mongoose.model('productModel', productSchema)
+module.exports = mongoose.model('schools', productSchema)
 
 
 // name:{
