@@ -67,5 +67,18 @@ const getAllSchools = async (req,res) => {
     }
 }
 
+const getSchool = async (req, res) => {
+    try {
+      const { id: schoolID } = req.params;
+      const school = await schools.findOne({ _id: schoolID });
+      if (!school) {
+        return res.status(404).json(`task not found with ID: ${schoolID}`);
+      }
+      res.status(201).json({ nHits: school.length, school });
+    } catch (error) {
+      // console.log(error);
+      res.status(500).json({ msg: error });
+    }
+  }
 
-module.exports = {getAllSchools}
+module.exports = {getAllSchools, getSchool}
