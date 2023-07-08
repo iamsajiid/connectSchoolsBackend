@@ -1,7 +1,7 @@
 const schools = require('../models/schema')
 
 const getAllSchools = async (req,res) => {
-    const {name, address, zip, state, Board, numericFilters, sort, fields} = req.query
+    const {name, address, zip, state, board, numericFilters, sort, fields} = req.query
     const queryObject = {}
     if(name){
         queryObject.name = {$regex: name, $options: 'i'}
@@ -12,8 +12,8 @@ const getAllSchools = async (req,res) => {
     if(state){
         queryObject.state = {$regex: state, $options:'i'}
     }
-    if(Board){
-        queryObject.Board = {$regex: Board, $options:'i'}
+    if(board){
+        queryObject.board = {$regex: board, $options:'i'}
     }
     if(zip){
         queryObject.zip = Number(zip)
@@ -53,11 +53,11 @@ const getAllSchools = async (req,res) => {
         result = result.select(fieldsList)
     }
 
-    const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || 10
-    const skip = (page-1) * limit
+    // const page = Number(req.query.page) || 1
+    // const limit = Number(req.query.limit) || 10
+    // const skip = (page-1) * limit
 
-    result = result.skip(skip).limit(limit)
+    // result = result.skip(skip).limit(limit)
 
     try {
         const school = await result
