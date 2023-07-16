@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+const users = require("../models/userAccountSchema");
 const schools = require('../models/schema')
 
 const getAllSchools = async (req,res) => {
@@ -81,4 +83,132 @@ const getSchool = async (req, res) => {
     }
   }
 
-module.exports = {getAllSchools, getSchool}
+const autoComplete = async(req,res)=>{
+    const {search} = req.query
+    const regEx = new RegExp(`^${search}`, 'i')
+    try{
+        const suggestions = await schools.find({name: regEx}).limit(10)
+        res.status(201).json(suggestions.map((suggests)=> suggests.name))
+    } catch(error){
+        res.status(500).json({msg: error})
+    }
+  }
+
+const saltRounds = 10;
+
+const checkIfUserExists = async (username) => {
+  let users1 = await users.find({ username: username });
+  // consopple.log(users1);
+  // console.log(users1.length);
+  if (users1.length === 0) {
+    return 0;
+  }
+  return 1;
+};
+
+// takes in a post request and creates an account based on the fields: name, email, passwordHash, grade, district, state, marksFromTest.
+// Name, email, password hash are required
+const createAccount = async (req, res) => {
+  let {
+    name,
+    username,
+    email,
+    password,
+    confirmPassword,
+    grade,
+    district,
+    state,
+    marksFromTest,
+  } = req.body;
+  console.log(req.body);
+  if (await checkIfUserExists(username)) {
+    return res.status(400).json({
+      error: "username already exists",
+    });
+  }
+
+  if (
+    !name ||
+    !email ||
+    !password ||
+    password != confirmPassword ||
+    !grade ||
+    !district ||
+    !state ||
+    !username
+  ) {
+    return res.status(400).json({
+      error: "Please provide all required fields",
+    });
+  }
+  let passwordHash;
+  try {
+    passwordHash = await bcrypt.hash(password, saltRounds);
+  } catch (err) {
+    console.log(err);
+  }
+  if (!marksFromTest) {
+    marksFromTest = null;
+  }
+  console.log("creating new user");
+  console.log(passwordHash);
+  const newUser = await users.create({
+    name,
+    username,
+    email,
+    passwordHash,
+    grade,
+    district,
+    state,
+    marksFromTest,
+  });
+
+  res.json(newUser);
+};
+
+//check if the username and password is correct, if correct, sets the userrname of the user in session
+const logIn = async (req, res) => {
+  let { username, password } = req.body;
+  console.log(req.body);
+  if (await checkIfUserExists(username)) {
+    //check the password and if it's correct, log the user in.
+    let users1 = await users.find({ username: username });
+    let storedHash;
+    users1.forEach((user) => {
+      storedHash = user.passwordHash;
+      console.log('password is' + storedHash)
+    });
+    bcrypt.compare(password, storedHash, (err, result) => {
+      if (err) {
+        console.error("Error comparing passwords:", err);
+        return;
+      } 
+      if (result) {
+        console.log("Passwords match!");
+        try {
+          req.session.user = { username: username };
+          res.send('logged in!');
+          console.log(req.session.user);
+          console.log('lol')
+        } catch (error)
+        {
+          console.log(error);
+          console.log('Error setting session user');
+          res.status(500).send("Internal Server Error");
+        }
+
+      } else {
+        console.log("Passwords do not match!");
+        return res.status(401).json({
+          error: 'wrong password'
+        });
+      }
+    });
+  } else {
+    return res.status(400).json({
+      error: "invalid username",
+    });
+  }
+};
+
+module.exports = {getAllSchools, getSchool, autoComplete, createAccount, logIn}
