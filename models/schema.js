@@ -5,8 +5,6 @@ const schoolSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
-  strict : true,
 
   address: String,
   
