@@ -31,7 +31,7 @@ const getAllSchools = async (req,res) => {
         }
         const regEx  = /\b<|>|>=|<=|=\b/g
         let filters = numericFilters.replace(regEx, (item)=>`-${operatorMap[item]}-`)
-        const options = ['fee structure minimum','fee structure maximum']
+        const options = ['fee_structure_minimum','fee_structure_maximum']
         filter = filters.split(',').forEach((item)=>{
             const [field, operator, value] = item.split("-")
             if(options.includes(field)){
