@@ -114,7 +114,6 @@ const createAccount = async (req, res) => {
     username,
     email,
     password,
-    confirmPassword,
     grade,
     district,
     state,
@@ -131,7 +130,6 @@ const createAccount = async (req, res) => {
     !name ||
     !email ||
     !password ||
-    password != confirmPassword ||
     !grade ||
     !district ||
     !state ||
