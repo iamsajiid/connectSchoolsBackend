@@ -155,6 +155,7 @@ const createAccount = async (req, res) => {
     marksFromTest,
   } = req.body;
   console.log(req.body);
+  console.log(name)
   if (await checkIfUserExists(username)) {
     return res.status(400).json({
       error: "username already exists",
@@ -184,18 +185,30 @@ const createAccount = async (req, res) => {
     marksFromTest = null;
   }
   console.log("creating new user");
-  console.log(passwordHash);
-  const newUser = await users.create({
-    name,
-    username,
-    email,
-    passwordHash,
-    grade,
-    district,
-    state,
-    marksFromTest,
-  });
-
+  // console.log(passwordHash);
+  try {
+    // Create a new user in the database
+    const newUser = await users.create({
+      name,
+      username,
+      email,
+      passwordHash,
+      grade,
+      district,
+      state,
+      marksFromTest,
+    });
+    console.log('account created')
+    return res.status(200).json({
+      success : true,
+      message : 'account created successfully',
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      error: "Something went wrong while creating the user",
+    });
+  }
   res.json(newUser);
 };
 
@@ -220,7 +233,8 @@ const logIn = async (req, res) => {
         console.log("Passwords match!");
         try {
           req.session.user = { username: username };
-          res.send('logged in!');
+          // res.send('logged in!');
+          return res.status(200).send({ success: true});
           console.log(req.session.user);
           console.log('lol')
         } catch (error)
