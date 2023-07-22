@@ -54,6 +54,7 @@ const getAllSchools = async (req,res) => {
         const fieldsList = fields.split(',').join(" ")
         result = result.select(fieldsList)
     }
+    console.log(fields)
 
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
@@ -69,30 +70,27 @@ const getAllSchools = async (req,res) => {
     }
 }
 
-async function calculateRecommendations(name) {
-    const axios = require("axios");
-    try {
-        const res = await axios.get("http://127.0.0.1:5000/recommend?name=" + name);
-        // console.log(res)
-      const arr = res.data; // The provided array is the response data itself
-  
-      const result = [];
-  
-      for (let i = 0; i < arr.length; i++) {
-        const schoolID = arr[i];
-        const school = await schools.findOne({ _id: schoolID }).exec();
-        // console.log(school); // Print the result of each school query
-        result.push(school);
-      }
-  
-      return (result); // Print all the results after the loop
-  
-    } catch (err) {
-      console.log(err);
-    }
+const compareSchools = async (req, res) => {
+  const {schoolIds} = req.query
+  console.log(schoolIds)
+  const schoolList = schoolIds.split(',')
+  console.log(schoolList)
+  if (!Array.isArray(schoolList) || schoolList.length < 2 || schoolList.length > 3) {
+    return res.status(400).json({ error: 'Invalid input. You must provide at minimum 2 and maximum 3 school IDs.' });
   }
-  
 
+  try {
+    const compare = await schools.find({ _id: { $in: schoolList } });
+    if (compare.length < schoolList.length) {
+      return res.status(404).json({ error: 'One or more schools not found in the database.' });
+    }
+    res.json(compare);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+}
+  
 const getSchool = async (req, res) => {
     try {
       const { id: schoolID } = req.params;
@@ -126,6 +124,29 @@ const autoComplete = async(req,res)=>{
         res.status(201).json(suggestions.map((suggests)=> suggests.name))
     } catch(error){
         res.status(500).json({msg: error})
+    }
+  }
+
+  async function calculateRecommendations(name) {
+    const axios = require("axios");
+    try {
+        const res = await axios.get("http://127.0.0.1:5000/recommend?name=" + name);
+        // console.log(res)
+      const arr = res.data; // The provided array is the response data itself
+  
+      const result = [];
+  
+      for (let i = 0; i < arr.length; i++) {
+        const schoolID = arr[i];
+        const school = await schools.findOne({ _id: schoolID }).exec();
+        // console.log(school); // Print the result of each school query
+        result.push(school);
+      }
+  
+      return (result); // Print all the results after the loop
+  
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -244,4 +265,4 @@ const logIn = async (req, res) => {
   }
 };
 
-module.exports = {getAllSchools, getSchool, autoComplete, createAccount, logIn}
+module.exports = {getAllSchools, compareSchools, getSchool, autoComplete, createAccount, logIn}

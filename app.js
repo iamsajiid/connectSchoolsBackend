@@ -21,9 +21,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false
   }));
+app.use(express.json())
 app.use(cors())
 app.use('/', routes)
-app.use(express.json())
 app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)
 
