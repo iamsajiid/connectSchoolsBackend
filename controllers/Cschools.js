@@ -69,6 +69,30 @@ const getAllSchools = async (req,res) => {
     }
 }
 
+async function calculateRecommendations(name) {
+    const axios = require("axios");
+    try {
+        const res = await axios.get("http://127.0.0.1:5000/recommend?name=" + name);
+        // console.log(res)
+      const arr = res.data; // The provided array is the response data itself
+  
+      const result = [];
+  
+      for (let i = 0; i < arr.length; i++) {
+        const schoolID = arr[i];
+        const school = await schools.findOne({ _id: schoolID }).exec();
+        // console.log(school); // Print the result of each school query
+        result.push(school);
+      }
+  
+      return (result); // Print all the results after the loop
+  
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  
+
 const getSchool = async (req, res) => {
     try {
       const { id: schoolID } = req.params;
@@ -76,7 +100,18 @@ const getSchool = async (req, res) => {
       if (!school) {
         return res.status(404).json(`task not found with ID: ${schoolID}`);
       }
-      res.status(201).json({ nHits: school.length, school });
+        console.log(school);
+        let recommendations;
+        try
+        {
+            recommendations = await calculateRecommendations(school.name)
+            console.log('got AI recommmendations.')
+        }
+        catch(error)
+        {
+            console.log('oops, acquiring ai recommendations failed.')
+        }
+      res.status(201).json({ nHits: school.length, school, recommendations });
     } catch (error) {
       // console.log(error);
       res.status(500).json({ msg: error });
