@@ -279,4 +279,46 @@ const logIn = async (req, res) => {
   }
 };
 
-module.exports = {getAllSchools, compareSchools, getSchool, autoComplete, createAccount, logIn}
+const addSchool = async (req, res) => {
+  
+  // const {name, address, district, zip, state, website, email, phone, board, overview, photo, type, status, established} = req.body
+
+  const schoolFee = req.body['fee'];
+  const map_location = req.body['map location'];
+  const coed_status = req.body['coed status'];
+  
+  // console.log(req.body);
+
+  const a_new_school = new schools({
+    name: req.body.name,
+    address: req.body.address,
+    city: req.body.city,
+    postalCode: req.body.postalCode,
+    state: req.body.state,
+    website: req.body.website,
+    email: req.body.email,
+    phoneNumber: req.body.phone, 
+    board: req.body.board,
+    fee: {
+        minimum: schoolFee.minimum,
+        maximum: schoolFee.maximum
+    },
+    googleMap: map_location,
+    overview: req.body.overview,
+    photo: req.body.photo,
+    type: req.body.type,
+    status: req.body.status,
+    established: req.body.established
+  });
+
+  try{
+      const response = await a_new_school.save();
+      res.json(response);
+      // console.log(response)
+  } catch(e) {
+      // console.log(e)
+  }  
+
+};
+
+module.exports = {getAllSchools, compareSchools, getSchool, autoComplete, createAccount, logIn, addSchool}
