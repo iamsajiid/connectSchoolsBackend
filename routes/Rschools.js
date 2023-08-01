@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {getAllSchools, compareSchools, getSchool, autoComplete, createAccount, logIn} = require('../controllers/Cschools')
+const {getAllSchools, compareSchools, getSchool, autoComplete, createAccount, logIn, addSchool} = require('../controllers/Cschools')
 
 router.get('/recommendation', (req, res) => {
     const axios = requier('axios')
@@ -17,5 +17,7 @@ router.get('/compareSchools', compareSchools)
 router.get('/autocomplete', autoComplete)
 router.post('/createaccount', createAccount)
 router.post('/login', logIn)
+router.post('/addSchool', addSchool)
 
 module.exports = router
+
